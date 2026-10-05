@@ -1,0 +1,6 @@
+@PSFtoEXCEL_HostAddress = http://localhost:5050
+
+GET {{PSFtoEXCEL_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
