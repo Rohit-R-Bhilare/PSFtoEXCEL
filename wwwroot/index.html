@@ -1,0 +1,1323 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PSF to Excel Converter</title>
+
+    <style>
+
+        /* =========================
+           GLOBAL
+        ========================= */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f9;
+            color: #1f2937;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 22px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+            .logo span {
+                color: #60a5fa;
+            }
+
+        .header-text {
+            font-size: 14px;
+            color: #d1d5db;
+        }
+
+        /* =========================
+           MAIN CONTAINER
+        ========================= */
+
+        .container {
+            width: 92%;
+            max-width: 1300px;
+            margin: 35px auto;
+        }
+
+        /* =========================
+           UPLOAD CARD
+        ========================= */
+
+        .upload-card {
+            background: white;
+            border-radius: 14px;
+            padding: 35px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+            .upload-card h1 {
+                font-size: 28px;
+                margin-bottom: 10px;
+            }
+
+            .upload-card p {
+                color: #6b7280;
+                margin-bottom: 25px;
+            }
+
+        /* =========================
+           FILE DROP AREA
+        ========================= */
+
+        .drop-area {
+            border: 2px dashed #9ca3af;
+            border-radius: 12px;
+            padding: 45px 20px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #f9fafb;
+        }
+
+            .drop-area:hover {
+                border-color: #2563eb;
+                background: #eff6ff;
+            }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .drop-area h3 {
+            margin-bottom: 8px;
+        }
+
+        .drop-area p {
+            margin-bottom: 15px;
+            color: #6b7280;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .choose-btn {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+            .choose-btn:hover {
+                background: #1d4ed8;
+            }
+
+        /* =========================
+           SELECTED FILE
+        ========================= */
+
+        .selected-file {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #eff6ff;
+            border-radius: 8px;
+            color: #1e40af;
+        }
+
+        /* =========================
+           BUTTON
+        ========================= */
+
+        .action-button {
+            margin-top: 20px;
+            padding: 13px 25px;
+            border: none;
+            border-radius: 8px;
+            background: #111827;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+            .action-button:hover {
+                background: #374151;
+            }
+
+            .action-button:disabled {
+                background: #9ca3af;
+                cursor: not-allowed;
+            }
+
+        /* =========================
+           MESSAGE
+        ========================= */
+
+        #message {
+            margin-top: 18px;
+            font-weight: bold;
+            min-height: 22px;
+        }
+
+        .success {
+            color: #15803d;
+        }
+
+        .error {
+            color: #dc2626;
+        }
+
+        .loading {
+            color: #2563eb;
+        }
+
+        /* =========================
+           SUMMARY CARDS
+        ========================= */
+
+        .summary {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+
+        .summary-title {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* =========================
+           DATA SECTION
+        ========================= */
+
+        .data-section {
+            display: none;
+            margin-top: 25px;
+            background: white;
+            border-radius: 14px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .data-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+            .data-header h2 {
+                font-size: 22px;
+            }
+
+        /* =========================
+           SEARCH
+        ========================= */
+
+        .search-box {
+            width: 300px;
+            padding: 11px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+        }
+
+            .search-box:focus {
+                border-color: #2563eb;
+            }
+
+        /* =========================
+           TABLE
+        ========================= */
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        thead {
+            background: #111827;
+            color: white;
+        }
+
+        th {
+            padding: 13px;
+            text-align: left;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        /* =========================
+           EXPORT BUTTON
+        ========================= */
+
+        .export-section {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .export-button {
+            background: #16a34a;
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+            .export-button:hover {
+                background: #15803d;
+            }
+
+        /* =========================
+           NO DATA
+        ========================= */
+
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+            text-align: center;
+            margin: 40px 0 20px;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 768px) {
+
+            .header {
+                padding: 18px 20px;
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .data-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         HEADER
+    ========================= -->
+
+    <header class="header">
+
+        <div class="logo">
+            PSF <span>→</span> Excel
+        </div>
+
+        <div class="header-text">
+            PSF Data Extraction & Excel Converter
+        </div>
+
+    </header>
+
+
+    <!-- =========================
+         MAIN
+    ========================= -->
+
+    <main class="container">
+
+
+        <!-- =========================
+             UPLOAD CARD
+        ========================= -->
+
+        <section class="upload-card">
+
+            <h1>
+                Convert PSF Data
+            </h1>
+
+            <p>
+                Upload your PSF file to extract and view the data.
+            </p>
+
+
+            <div class="drop-area"
+                 id="dropArea">
+
+                <div class="upload-icon">
+                    📁
+                </div>
+
+                <h3>
+                    Drop your PSF file here
+                </h3>
+
+                <p>
+                    or
+                </p>
+
+
+                <label for="fileInput"
+                       class="choose-btn">
+                    Choose PSF File
+                </label>
+
+
+                <input type="file"
+                       id="fileInput"
+                       accept=".psf">
+
+            </div>
+
+
+            <!-- Selected File -->
+
+            <div id="selectedFile"
+                 class="selected-file">
+
+                📄
+
+                <strong>
+                    Selected File:
+                </strong>
+
+                <span id="fileName">
+                </span>
+
+            </div>
+
+
+            <!-- Process Button -->
+
+            <button id="uploadBtn"
+                    class="action-button"
+                    disabled>
+                Read PSF File
+            </button>
+
+
+            <!-- Message -->
+
+            <div id="message"></div>
+
+        </section>
+
+
+        <!-- =========================
+             SUMMARY
+        ========================= -->
+
+        <section id="summary"
+                 class="summary">
+
+            <div class="summary-card">
+
+                <div class="summary-title">
+                    File Name
+                </div>
+
+                <div id="summaryFile"
+                     class="summary-value">
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-title">
+                    Total Records
+                </div>
+
+                <div id="recordCount"
+                     class="summary-value">
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-title">
+                    Status
+                </div>
+
+                <div id="status"
+                     class="summary-value">
+                    Ready
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             DATA TABLE
+        ========================= -->
+
+        <section id="dataSection"
+                 class="data-section">
+
+
+            <div class="data-header">
+
+                <h2>
+                    PSF Data
+                </h2>
+
+
+                <input type="text"
+                       id="searchBox"
+                       class="search-box"
+                       placeholder="🔍 Search data...">
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead id="tableHead">
+
+                    </thead>
+
+
+                    <tbody id="tableBody">
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- =========================
+                 EXPORT
+            ========================= -->
+
+            <div class="export-section">
+
+                <button id="exportBtn"
+                        class="export-button">
+                    📥 Export to Excel
+                </button>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =========================
+         FOOTER
+    ========================= -->
+
+    <footer>
+
+        PSF to Excel Converter
+
+    </footer>
+
+
+
+    <script>
+
+
+/* ==========================================
+   GLOBAL DATA
+========================================== */
+
+let psfData = [];
+
+let selectedFile = null;
+
+
+
+/* ==========================================
+   ELEMENTS
+========================================== */
+
+const fileInput =
+    document.getElementById("fileInput");
+
+const uploadBtn =
+    document.getElementById("uploadBtn");
+
+const dropArea =
+    document.getElementById("dropArea");
+
+const selectedFileBox =
+    document.getElementById("selectedFile");
+
+const fileName =
+    document.getElementById("fileName");
+
+const message =
+    document.getElementById("message");
+
+const summary =
+    document.getElementById("summary");
+
+const dataSection =
+    document.getElementById("dataSection");
+
+const tableHead =
+    document.getElementById("tableHead");
+
+const tableBody =
+    document.getElementById("tableBody");
+
+const searchBox =
+    document.getElementById("searchBox");
+
+const exportBtn =
+    document.getElementById("exportBtn");
+
+
+
+/* ==========================================
+   FILE SELECT
+========================================== */
+
+fileInput.addEventListener(
+    "change",
+    function () {
+
+        if (this.files.length === 0) {
+
+            return;
+
+        }
+
+        const file =
+            this.files[0];
+
+
+        validateFile(file);
+
+    }
+);
+
+
+
+/* ==========================================
+   VALIDATE FILE
+========================================== */
+
+function validateFile(file) {
+
+
+    const extension =
+        file.name
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+
+    if (extension !== "psf") {
+
+        showMessage(
+            "Please select a valid .PSF file.",
+            "error"
+        );
+
+        uploadBtn.disabled = true;
+
+        return;
+
+    }
+
+
+    selectedFile = file;
+
+
+    fileName.innerText =
+        file.name;
+
+
+    selectedFileBox.style.display =
+        "block";
+
+
+    uploadBtn.disabled =
+        false;
+
+
+    showMessage(
+        "PSF file selected. Click 'Read PSF File'.",
+        "success"
+    );
+
+}
+
+
+
+/* ==========================================
+   DRAG & DROP
+========================================== */
+
+dropArea.addEventListener(
+    "dragover",
+    function (event) {
+
+        event.preventDefault();
+
+        dropArea.style.borderColor =
+            "#2563eb";
+
+        dropArea.style.background =
+            "#eff6ff";
+
+    }
+);
+
+
+dropArea.addEventListener(
+    "dragleave",
+    function () {
+
+        dropArea.style.borderColor =
+            "#9ca3af";
+
+        dropArea.style.background =
+            "#f9fafb";
+
+    }
+);
+
+
+dropArea.addEventListener(
+    "drop",
+    function (event) {
+
+        event.preventDefault();
+
+
+        dropArea.style.borderColor =
+            "#9ca3af";
+
+        dropArea.style.background =
+            "#f9fafb";
+
+
+        const files =
+            event.dataTransfer.files;
+
+
+        if (files.length === 0) {
+
+            return;
+
+        }
+
+
+        const file =
+            files[0];
+
+
+        validateFile(file);
+
+    }
+);
+
+
+
+/* ==========================================
+   READ PSF FILE
+========================================== */
+
+uploadBtn.addEventListener(
+    "click",
+    async function () {
+
+
+        if (!selectedFile) {
+
+            showMessage(
+                "Please select a PSF file.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const formData =
+            new FormData();
+
+
+        formData.append(
+            "file",
+            selectedFile
+        );
+
+
+        uploadBtn.disabled =
+            true;
+
+
+        showMessage(
+            "Reading PSF file...",
+            "loading"
+        );
+
+
+        try {
+
+
+            const response =
+                await fetch(
+                    "/api/psf/upload",
+                    {
+                        method: "POST",
+
+                        body: formData
+                    }
+                );
+
+
+            let result;
+
+
+            try {
+
+                result =
+                    await response.json();
+
+            }
+            catch {
+
+                result = {};
+
+            }
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    result.message ||
+                    "Unable to process PSF file."
+                );
+
+            }
+
+
+            psfData =
+                result.data || [];
+
+
+            /* File name */
+
+            document
+                .getElementById("summaryFile")
+                .innerText =
+                result.fileName ||
+                selectedFile.name;
+
+
+            /* Record count */
+
+            document
+                .getElementById("recordCount")
+                .innerText =
+                result.totalRecords ||
+                psfData.length;
+
+
+            /* Status */
+
+            document
+                .getElementById("status")
+                .innerText =
+                "Processed";
+
+
+            summary.style.display =
+                "grid";
+
+
+            displayTable(psfData);
+
+
+            showMessage(
+                "PSF file successfully processed.",
+                "success"
+            );
+
+
+        }
+        catch (error) {
+
+
+            console.error(error);
+
+
+            showMessage(
+                error.message ||
+                "An error occurred while reading the PSF file.",
+                "error"
+            );
+
+
+        }
+        finally {
+
+            uploadBtn.disabled =
+                false;
+
+        }
+
+    }
+);
+
+
+
+/* ==========================================
+   DISPLAY TABLE
+========================================== */
+
+function displayTable(data) {
+
+
+    tableHead.innerHTML =
+        "";
+
+    tableBody.innerHTML =
+        "";
+
+
+    if (!data || data.length === 0) {
+
+
+        tableBody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="100"
+                    class="no-data"
+                >
+                    No data found in the PSF file.
+                </td>
+
+            </tr>
+
+        `;
+
+
+        dataSection.style.display =
+            "block";
+
+
+        return;
+
+    }
+
+
+    /*
+       Find every unique column
+    */
+
+    const columns =
+        [
+            ...new Set(
+                data.flatMap(
+                    row =>
+                        Object.keys(row)
+                )
+            )
+        ];
+
+
+
+    /* ======================================
+       HEADER
+    ====================================== */
+
+    const headerRow =
+        document.createElement("tr");
+
+
+    columns.forEach(
+        column => {
+
+
+            const th =
+                document.createElement("th");
+
+
+            th.innerText =
+                column;
+
+
+            headerRow.appendChild(th);
+
+        }
+    );
+
+
+    tableHead.appendChild(
+        headerRow
+    );
+
+
+
+    /* ======================================
+       BODY
+    ====================================== */
+
+    data.forEach(
+        row => {
+
+
+            const tr =
+                document.createElement("tr");
+
+
+            columns.forEach(
+                column => {
+
+
+                    const td =
+                        document.createElement("td");
+
+
+                    td.innerText =
+                        row[column] ??
+                        "";
+
+
+                    tr.appendChild(td);
+
+                }
+            );
+
+
+            tableBody.appendChild(tr);
+
+        }
+    );
+
+
+    dataSection.style.display =
+        "block";
+
+}
+
+
+
+/* ==========================================
+   SEARCH
+========================================== */
+
+searchBox.addEventListener(
+    "input",
+    function () {
+
+
+        const searchText =
+            this.value
+                .toLowerCase()
+                .trim();
+
+
+        if (!searchText) {
+
+            displayTable(psfData);
+
+            return;
+
+        }
+
+
+        const filteredData =
+            psfData.filter(
+                row => {
+
+
+                    return Object
+                        .values(row)
+                        .some(
+                            value =>
+                                String(value)
+                                    .toLowerCase()
+                                    .includes(
+                                        searchText
+                                    )
+                        );
+
+                }
+            );
+
+
+        displayTable(
+            filteredData
+        );
+
+    }
+);
+
+
+
+/* ==========================================
+   EXPORT TO EXCEL
+========================================== */
+
+exportBtn.addEventListener(
+    "click",
+    async function () {
+
+
+        if (
+            !psfData ||
+            psfData.length === 0
+        ) {
+
+            alert(
+                "There is no data to export."
+            );
+
+            return;
+
+        }
+
+
+        exportBtn.disabled =
+            true;
+
+
+        exportBtn.innerText =
+            "Creating Excel...";
+
+
+        try {
+
+
+            const response =
+                await fetch(
+                    "/api/psf/export",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body:
+                            JSON.stringify(
+                                psfData
+                            )
+
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Excel file could not be created."
+                );
+
+            }
+
+
+            const blob =
+                await response.blob();
+
+
+            const url =
+                window
+                    .URL
+                    .createObjectURL(blob);
+
+
+            const downloadLink =
+                document.createElement("a");
+
+
+            downloadLink.href =
+                url;
+
+
+            downloadLink.download =
+                "PSF_Data.xlsx";
+
+
+            document
+                .body
+                .appendChild(
+                    downloadLink
+                );
+
+
+            downloadLink.click();
+
+
+            downloadLink.remove();
+
+
+            window
+                .URL
+                .revokeObjectURL(url);
+
+
+            showMessage(
+                "Excel file downloaded successfully.",
+                "success"
+            );
+
+
+        }
+        catch (error) {
+
+
+            console.error(error);
+
+
+            showMessage(
+                error.message ||
+                "Excel export failed.",
+                "error"
+            );
+
+        }
+        finally {
+
+
+            exportBtn.disabled =
+                false;
+
+
+            exportBtn.innerText =
+                "📥 Export to Excel";
+
+        }
+
+    }
+);
+
+
+
+/* ==========================================
+   MESSAGE FUNCTION
+========================================== */
+
+function showMessage(
+    text,
+    type
+) {
+
+
+    message.innerText =
+        text;
+
+
+    message.className =
+        type;
+
+}
+
+
+
+    </script>
+
+
+</body>
+
+</html>
